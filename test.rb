@@ -1,3 +1,5 @@
+require 'rails'
+
 require 'tempfile'
 require 'fileutils'
 
