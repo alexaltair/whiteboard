@@ -9,10 +9,12 @@ describe_models do
   models :votes, :likes, :profiles
 end
 
-# describe_connections do
-#   :user.has_many :posts, :comments, :votes, :likes
-#   :user.has_one :profile
-#   :vote.belongs_to :posts, :comments, as: :votable
-# end
+describe_connections do
+  :user.has_many :posts, :comments, :votes, :likes
+  # :user.has_one :profile
+  # :vote.belongs_to :posts, :comments, as: :votable
+end
 
+`rm -rf testclasses`
+Dir.mkdir("testclasses")
 RailsModel.model_list.values.each(&:to_file)

@@ -17,6 +17,16 @@ class RailsModel
   end
   @model_list = {}
 
+  Symbol.class_eval do
+    define_method :has_many do |*args|
+      if RailsModel.model_list.include? self
+        RailsModel.model_list[self].has_many(*args)
+      else
+        method_missing(:has_many, *args)
+      end
+    end
+  end
+
   attr_accessor :name, :attributes
 
   def initialize(name)
@@ -33,11 +43,11 @@ class RailsModel
     @attributes.merge! attributes
   end
 
-  # def has_many(*others)
-  #   # Puts 'has_many other' on self.
-  #   # For each thing in others, creates it if it doesn't exist, and adds 'belongs_to #{self}' to each.
-  #   # Adds self as an attribute to each thing on others.
-  # end
+  def has_many(*others)
+    # Puts 'has_many other' on self.
+    # For each thing in others, creates it if it doesn't exist, and adds 'belongs_to #{self}' to each.
+    # Adds self as an attribute to each thing on others.
+  end
 
   # def has_one(*others)
   #   # Puts 'has_many other' on self.
@@ -70,10 +80,11 @@ class RailsModel
 
 end
 
+
 def describe_models(&block)
   RailsModel.class_eval &block
 end
 
 def describe_connections(&block)
-
+  RailsModel.class_eval &block
 end
