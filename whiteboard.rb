@@ -1,19 +1,27 @@
+require 'active_support/inflector'
+
 class RailsModel
 
   class << self
-    attr_accessor :models
+    attr_accessor :model_list
 
-    def find_or_create(name)
-      models[name] || new(name)
+    def model(name, options=nil, &block)
+      new_model = new(name)
+      new_model.has(options) if options
+      new_model.instance_eval &block if block_given?
+    end
+
+    def models(*names)
+      names.each { |name| model(name.to_s.singularize.to_sym) }
     end
   end
-  @models = {}
+  @model_list = {}
 
   attr_accessor :name, :attributes
 
   def initialize(name)
     @name = name
-    RailsModel.models[name] = self
+    RailsModel.model_list[name] = self
     @attributes = {}
     @has_many = {}
     @has_one = {}
@@ -25,21 +33,21 @@ class RailsModel
     @attributes.merge! attributes
   end
 
-  def has_many(*others)
-    # Puts 'has_many other' on self.
-    # For each thing in others, creates it if it doesn't exist, and adds 'belongs_to #{self}' to each.
-    # Adds self as an attribute to each thing on others.
-  end
+  # def has_many(*others)
+  #   # Puts 'has_many other' on self.
+  #   # For each thing in others, creates it if it doesn't exist, and adds 'belongs_to #{self}' to each.
+  #   # Adds self as an attribute to each thing on others.
+  # end
 
-  def has_one(*others)
-    # Puts 'has_many other' on self.
-    # For each thing in others, creates it if it doesn't exist, and adds 'belongs_to' to each.
-    # Adds this RailsModel as an attribute to each thing on others.
-  end
+  # def has_one(*others)
+  #   # Puts 'has_many other' on self.
+  #   # For each thing in others, creates it if it doesn't exist, and adds 'belongs_to' to each.
+  #   # Adds this RailsModel as an attribute to each thing on others.
+  # end
 
-  def belongs_to(*others, hash)
+  # def belongs_to(*others, hash)
 
-  end
+  # end
 
   def to_file
     # Gets into the app/models directory and creates the file #{name}.rb, and writes the string to it.
@@ -52,8 +60,8 @@ class RailsModel
     lines << "end"
 
     file_string = lines.join("\n")
-    File.new("#{self.name}.rb", "w")
-    File.write("#{self.name}.rb", file_string)
+    File.new("testclasses/#{self.name}.rb", "w")
+    File.write("testclasses/#{self.name}.rb", file_string)
   end
 
   def make_migration
@@ -62,7 +70,10 @@ class RailsModel
 
 end
 
-def create(name, &block)
-  model = RailsModel.find_or_create(name)
-  model.instance_eval &block if block_given?
+def describe_models(&block)
+  RailsModel.class_eval &block
+end
+
+def describe_connections(&block)
+
 end

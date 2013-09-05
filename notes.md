@@ -27,7 +27,7 @@ X has_one Y :through Z
   puts an x_id in the z table and a z_id on the y table
   What happens if you don't type "Z has_one Y"?
 X has_and_belongs_to_many Y
-  Makes a Xs_Ys table, whose rows are pairs of x_ids and y_ids.
+  Makes a XsYs table, whose rows are pairs of x_ids and y_ids.
   What happens if you don't write "has_and_belong_to_many" in both places?
 belongs_to vs has_one
 has_many :through vs has_and_belongs_to_many
