@@ -1,4 +1,4 @@
-require 'whiteboard'
+require './whiteboard'
 
 create :user do
   has name: :string, email: :string, password_digest: :string, bio: :text
@@ -14,3 +14,5 @@ end
 create :post do
   has body: :text
 end
+
+RailsModel.models.values.each(&:to_file)
