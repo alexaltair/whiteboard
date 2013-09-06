@@ -3,6 +3,7 @@ require './rails_model.rb'
 describe_models do
   model :user do
     has name: :string, email: :string, password_digest: :string, bio: :text
+    can :update_password, "Delete old password_digest and set new one."
   end
   model(:comment) { has body: :text }
   model :post, body: :text

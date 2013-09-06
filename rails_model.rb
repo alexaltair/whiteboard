@@ -1,5 +1,4 @@
 require 'active_support/inflector'
-require 'pp'
 
 class RailsModel
 
@@ -54,12 +53,13 @@ class RailsModel
     end
   end
 
-  attr_accessor :name, :attributes, :has_many_of_these, :has_one_of_these, :belongs_to_these, :has_and_belongs_to_many_of_these
+  attr_accessor :name, :attributes, :methods, :has_many_of_these, :has_one_of_these, :belongs_to_these, :has_and_belongs_to_many_of_these
 
   def initialize(name)
     @name = name
     RailsModel.model_list[name] = self
     @attributes = {}
+    @methods = {}
     @has_many_of_these = {} # Plural
     @has_one_of_these = {} # Singular
     @belongs_to_these = {} # Singular
@@ -73,6 +73,10 @@ class RailsModel
       id = attributes.to_s.singularize.+('_id').to_sym
       has id => :integer
     end
+  end
+
+  def can(method, description='')
+    @methods[method] = description
   end
 
   def has_many(*others)
@@ -132,6 +136,12 @@ class RailsModel
       lines << "  has_and_belongs_to_many :#{other}"
     end
     lines << ""
+    @methods.each do |name, description|
+      lines << "  def #{name}"
+      lines << "    \# #{description}"
+      lines << "  end"
+      lines << ""
+    end
     lines << "end"
 
     RailsModel.create_file("app/models", @name, lines.join("\n"))
