@@ -29,15 +29,13 @@ X has_one Y :through Z
 X has_and_belongs_to_many Y
   Makes a XsYs table, whose rows are pairs of x_ids and y_ids.
   What happens if you don't write "has_and_belong_to_many" in both places?
-belongs_to vs has_one
-has_many :through vs has_and_belongs_to_many
-  Do you want the relationship to be a thing of its own, with attributes, validations, and callbacks?
 X has_many Y, as: Z
   puts a x_id in the y table as a z_id, and a z_type which is x
 self joins
 
-
-dependent: :destroy?
+belongs_to vs has_one
+has_many :through vs has_and_belongs_to_many
+  Do you want the relationship to be a thing of its own, with attributes, validations, and callbacks?
 
 
 model = Class.new(ActiveRecord::Base)

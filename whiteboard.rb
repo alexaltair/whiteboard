@@ -1,41 +1,54 @@
 require 'active_support/inflector'
+require 'set'
+require 'pp'
 
 class RailsModel
 
   class << self
     attr_accessor :model_list
 
+    def find_or_create(name)
+      model_list[name] || new(name)
+    end
+
     def model(name, options=nil, &block)
-      new_model = new(name)
+      new_model = find_or_create(name)
       new_model.has(options) if options
       new_model.instance_eval &block if block_given?
     end
 
     def models(*names)
-      names.each { |name| model(name.to_s.singularize.to_sym) }
+      names.each { |name| model(name.singularize) }
     end
   end
   @model_list = {}
 
+  connection_methods = [:has_many, :has_one, :belongs_to, :has_and_belongs_to_many]
   Symbol.class_eval do
-    define_method :has_many do |*args|
-      if RailsModel.model_list.include? self
-        RailsModel.model_list[self].has_many(*args)
-      else
-        method_missing(:has_many, *args)
+    def singularize
+      self.to_s.singularize.to_sym
+    end
+
+    connection_methods.each do |method|
+      define_method(method) do |*args|
+        if RailsModel.model_list.include? self
+          RailsModel.model_list[self].send(method, *args)
+        else
+          method_missing(method, *args)
+        end
       end
     end
   end
 
-  attr_accessor :name, :attributes
+  attr_accessor :name, :attributes, :has_many_of_these, :has_one_of_these, :belongs_to_these
 
   def initialize(name)
     @name = name
     RailsModel.model_list[name] = self
     @attributes = {}
-    @has_many = {}
-    @has_one = {}
-    @belongs_to = {}
+    @has_many_of_these = Set.new
+    @has_one_of_these = {}
+    @belongs_to_these = {}
   end
 
   def has(attributes)
@@ -44,38 +57,56 @@ class RailsModel
   end
 
   def has_many(*others)
-    # Puts 'has_many other' on self.
-    # For each thing in others, creates it if it doesn't exist, and adds 'belongs_to #{self}' to each.
-    # Adds self as an attribute to each thing on others.
+    @has_many_of_these += Set.new(others)
+    others.each do |other|
+      other = RailsModel.find_or_create(other.singularize)
+      other.belongs_to_these[self] = nil
+
+      id = @name.to_s.singularize.+('_id').to_sym
+      other.has id => :integer
+    end
   end
 
-  # def has_one(*others)
-  #   # Puts 'has_many other' on self.
-  #   # For each thing in others, creates it if it doesn't exist, and adds 'belongs_to' to each.
-  #   # Adds this RailsModel as an attribute to each thing on others.
-  # end
+  def has_one(*others)
+    # Puts 'has_many other' on self.
+    # For each thing in others, creates it if it doesn't exist, and adds 'belongs_to' to each.
+    # Adds this RailsModel as an attribute to each thing on others.
+  end
 
-  # def belongs_to(*others, hash)
+  def belongs_to(*others, options)
+    # Only used for polymorphism.
+  end
 
-  # end
+  def has_and_belongs_to_many(other, options={})
+    # Used for direct HABTM, or has_many to has_many.
+  end
 
   def to_file
     # Gets into the app/models directory and creates the file #{name}.rb, and writes the string to it.
 
     lines = []
-    lines << "class #{self.name.capitalize} < ActiveRecord::Base"
+    lines << "class #{@name.capitalize} < ActiveRecord::Base"
     attr_names = @attributes.keys.map{ |key| ':' + key.to_s.gsub(/_id\Z/, '') }
     lines << "  attr_accessible " + attr_names.join(', ') unless @attributes.empty?
     lines << ""
+    @has_many_of_these.each do |other|
+      lines << "  has_many :#{other}"
+    end
+    @belongs_to_these.keys.each do |other|
+      lines << "  belongs_to :#{other.name}"
+    end
     lines << "end"
 
     file_string = lines.join("\n")
-    File.new("testclasses/#{self.name}.rb", "w")
-    File.write("testclasses/#{self.name}.rb", file_string)
+    Dir.chdir("app/models")
+    File.new("#{@name}.rb", "w")
+    File.write("#{@name}.rb", file_string)
+    Dir.chdir("../..")
   end
 
   def make_migration
     # Creates the migration files.
+    timestamp = Time.now.to_s.split(" ")[0..1].join('').gsub(/\D/, '')
   end
 
 end

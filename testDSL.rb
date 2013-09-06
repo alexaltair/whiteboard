@@ -6,15 +6,19 @@ describe_models do
   end
   model(:comment) { has body: :text }
   model :post, body: :text
-  models :votes, :likes, :profiles
+  models :votes, :likes, :profiles, :networks, :friends
 end
 
 describe_connections do
   :user.has_many :posts, :comments, :votes, :likes
-  # :user.has_one :profile
-  # :vote.belongs_to :posts, :comments, as: :votable
+  :user.has_one :profile
+  :user.has_one :foo, through: :bar
+  :vote.belongs_to :posts, :comments, as: :votable
+  :user.has_and_belongs_to_many :networks
+  :user.has_and_belongs_to_many :friends, through: :friendship
 end
 
-`rm -rf testclasses`
-Dir.mkdir("testclasses")
+# `rm -rf Examply`
+`rails new Examply --skip-bundle`
+Dir.chdir("Examply")
 RailsModel.model_list.values.each(&:to_file)
