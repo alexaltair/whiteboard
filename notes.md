@@ -1,19 +1,3 @@
-Steps
-* Make a rails app with the name of the models file
-* Make an empty set which will contain all the RailsModels
-* Run the models file
-* For each call to #create
-  * Initialize a RailsModel for each new model in the block
-  * Add to or modify model data structures according to the methods in the block
-* Create class files for all the models
-  * Maybe use 'rails generate model'
-  * Add associations
-* Create migration files for all the models
-  * Add foreign_ids to the migration files
-  * Create any join tables
-  * Run 'rake db:migrate'
-
-
 X belongs_to Y
   puts a y_id in the x table
 X has_one Y
@@ -36,10 +20,5 @@ self joins
 belongs_to vs has_one
 has_many :through vs has_and_belongs_to_many
   Do you want the relationship to be a thing of its own, with attributes, validations, and callbacks?
-
-
-model = Class.new(ActiveRecord::Base)
-overriding method_missing()
-define_method(:method_name, &block)
 
 Rails::Generators::Base < Thor::Group
