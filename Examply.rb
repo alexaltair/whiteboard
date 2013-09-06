@@ -13,7 +13,7 @@ end
 describe_associations do
   :user.has_many :posts, :comments, :votes, :likes
   :user.has_one :profile, :avatar
-  :post.has_one :bar, through: :baz
+  :post.has_one :featured_image, through: :album
   :vote.belongs_to :post, :comment, as: :votable
   :user.has_and_belongs_to_many :networks
   :user.has_and_belongs_to_many :friends, through: :friendship

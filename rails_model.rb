@@ -92,6 +92,27 @@ class RailsModel
     # Puts 'has_many other' on self.
     # For each thing in others, creates it if it doesn't exist, and adds 'belongs_to' to each.
     # Adds this RailsModel as an attribute to each thing on others.
+    if !others[1].is_a? Hash
+      others.each do |other|
+        other = RailsModel.find_or_create(other)
+        @has_one_of_these[other.name] = nil
+        other.belongs_to_these[@name] = nil
+        other.has @name
+      end
+    elsif join = others[1][:through]
+      other = RailsModel.find_or_create(others[0])
+      join = RailsModel.find_or_create(join)
+
+      @has_one_of_these[join.name] = nil
+      @has_one_of_these[other.name] = join.name
+
+      other.belongs_to_these[join.name] = nil
+      other.has join.name
+
+      join.has_one_of_these[other.name] = nil
+      join.belongs_to_these[@name] = nil
+      join.has @name
+    end
   end
 
   def belongs_to(*others, options)
@@ -128,6 +149,12 @@ class RailsModel
     end
     @has_many_of_these.select{|k,v| !v.nil?}.each do |other, join|
       lines << "  has_many :#{other}, through: :#{join}"
+    end
+    @has_one_of_these.select{|k,v| v.nil?}.keys.each do |other|
+      lines << "  has_one :#{other}"
+    end
+    @has_one_of_these.select{|k,v| !v.nil?}.each do |other, join|
+      lines << "  has_one :#{other}, through: :#{join}"
     end
     @belongs_to_these.keys.each do |other|
       lines << "  belongs_to :#{other}"
