@@ -121,7 +121,7 @@ class RailsModel
     @belongs_to_these[polymorphic] = :polymorphic
     RailsModel.find_or_create(@name.singularize).has polymorphic
     others.each do |other|
-      RailsModel.find_or_create(other).has_many_of_these[@name] = :votable
+      RailsModel.find_or_create(other).has_many_of_these[@name.pluralize] = {as: :votable}
     end
   end
 
@@ -141,8 +141,8 @@ class RailsModel
       join.belongs_to_these[other.name] = nil
       join.has @name
       join.has other.name
-      @has_many_of_these[other.name.pluralize] = join.name
-      other.has_many_of_these[@name.pluralize] = join.name
+      @has_many_of_these[other.name.pluralize] = {through: join.name}
+      other.has_many_of_these[@name.pluralize] = {through: join.name}
     end
   end
 
@@ -158,7 +158,7 @@ class RailsModel
       lines << "  has_many :#{other}"
     end
     @has_many_of_these.select{|k,v| !v.nil?}.each do |other, join|
-      lines << "  has_many :#{other}, through: :#{join}"
+      lines << "  has_many :#{other}, #{join.keys.first}: :#{join.values.first}"
     end
     @has_one_of_these.select{|k,v| v.nil?}.keys.each do |other|
       lines << "  has_one :#{other}"
