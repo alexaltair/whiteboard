@@ -14,7 +14,20 @@ describe_associations do
   :user.has_many :posts, :comments, :votes, :likes
   :user.has_one :profile, :avatar
   :post.has_one :featured_image, through: :album
-  :vote.belongs_to :post, :comment, as: :votable
+  :votes.belong_to :post, :comment, as: :votable
   :user.has_and_belongs_to_many :networks
   :user.has_and_belongs_to_many :friends, through: :friendship
 end
+
+# self
+# class Vote < ActiveRecord::Base
+#   belongs_to :votable, polymorphic: true
+# end
+
+# class Post < ActiveRecord::Base
+#   has_many :votes, as: :votable
+# end
+
+# class Comment < ActiveRecord::Base
+#   has_many :votes, as: :votable
+# end

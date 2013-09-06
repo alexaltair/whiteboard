@@ -32,7 +32,7 @@ class RailsModel
   end
   @model_list = {}
 
-  connection_methods = [:has_many, :has_one, :belongs_to, :has_and_belongs_to_many]
+  connection_methods = [:has_many, :has_one, :belong_to, :belongs_to, :has_and_belongs_to_many]
   Symbol.class_eval do
     def singularize
       self.to_s.singularize.to_sym
@@ -44,8 +44,8 @@ class RailsModel
 
     connection_methods.each do |method|
       define_method(method) do |*args|
-        if RailsModel.model_list.include? self
-          RailsModel.model_list[self].send(method, *args)
+        if RailsModel.model_list.include? self.singularize
+          RailsModel.model_list[self.singularize].send(method, *args)
         else
           method_missing(method, *args)
         end
@@ -115,8 +115,18 @@ class RailsModel
     end
   end
 
+  def belong_to(*others, options)
+    # Only used for polymorphism, has_many.
+    polymorphic = options[:as]
+    @belongs_to_these[polymorphic] = :polymorphic
+    RailsModel.find_or_create(@name.singularize).has polymorphic
+    others.each do |other|
+      RailsModel.find_or_create(other).has_many_of_these[@name] = :votable
+    end
+  end
+
   def belongs_to(*others, options)
-    # Only used for polymorphism.
+    # Only used for polymorphism, has_one.
   end
 
   def has_and_belongs_to_many(other, options={})
@@ -156,8 +166,11 @@ class RailsModel
     @has_one_of_these.select{|k,v| !v.nil?}.each do |other, join|
       lines << "  has_one :#{other}, through: :#{join}"
     end
-    @belongs_to_these.keys.each do |other|
+    @belongs_to_these.select{|k,v| v.nil?}.keys.each do |other|
       lines << "  belongs_to :#{other}"
+    end
+    @belongs_to_these.select{|k,v| !v.nil?}.keys.each do |other|
+      lines << "  belongs_to :#{other}, polymorphic: true"
     end
     @has_and_belongs_to_many_of_these.keys.each do |other|
       lines << "  has_and_belongs_to_many :#{other}"
