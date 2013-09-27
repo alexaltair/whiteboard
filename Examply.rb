@@ -18,16 +18,3 @@ describe_associations do
   :user.has_and_belongs_to_many :networks
   :user.has_and_belongs_to_many :friends, through: :friendship
 end
-
-# self
-# class Vote < ActiveRecord::Base
-#   belongs_to :votable, polymorphic: true
-# end
-
-# class Post < ActiveRecord::Base
-#   has_many :votes, as: :votable
-# end
-
-# class Comment < ActiveRecord::Base
-#   has_many :votes, as: :votable
-# end
