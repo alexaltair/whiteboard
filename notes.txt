@@ -22,3 +22,13 @@ has_many :through vs has_and_belongs_to_many
   Do you want the relationship to be a thing of its own, with attributes, validations, and callbacks?
 
 Rails::Generators::Base < Thor::Group
+
+
+make it a gem
+Use Thor to launch it?
+Increase support for polymorphism
+Rewrite some DSL method names
+Future features
+* Be able to update schema
+* Graphical interface to chart rails schema
+* add support for creating models from CSVs, and make a seed file from the data.
